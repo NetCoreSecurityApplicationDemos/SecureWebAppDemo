@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SecureWebAppDemo.Models;
 
 namespace SecureWebAppDemo.Data
 {
@@ -7,7 +8,7 @@ namespace SecureWebAppDemo.Data
         : IdentityDbContext
     {
 
-
+        public DbSet<AppUser> AppUsers { get; set; }    
         public AppDataContext(DbContextOptions<AppDataContext> options)
             : base(options)
         {
