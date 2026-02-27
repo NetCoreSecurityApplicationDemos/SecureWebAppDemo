@@ -1,0 +1,21 @@
+﻿ 
+<h2>2FA Aktifleştir</h2>
+
+<p>Authenticator uygulaması ile QR kodu okutun</p>
+
+<p>Manuel Kod: @ViewBag.SharedKey</p>
+
+<form asp-action="Confirm2FA" method="post">
+	<div>
+		<label>Doğrulama Kodu</label>
+		<input type="text" name="code" />
+	</div>
+	<button type="submit">Onayla</button>
+</form>
+
+@section Scripts{
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+	<script>
+		new QRCode(document.getElementById("qrCode"), "@ViewBag.AuthenticatorUri"); //Server side qr kod üretmek yerine js ile kod üretiyor
+	</script>
+}

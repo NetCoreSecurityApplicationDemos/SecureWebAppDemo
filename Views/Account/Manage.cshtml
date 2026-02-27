@@ -1,0 +1,20 @@
+﻿@model  SecureWebAppDemo.ViewModel.ManageViewModel
+<h2>Hesap Ayarları</h2>
+<p><strong>Email : </strong>@Model.Email</p>	
+<hr />
+
+<h3>İki Adımlı Doğrulama (2FA) </h3>
+
+@if (Model.TwoFactorEnabled)
+{
+	<p style="color:green;">2FA Aktif</p>
+	<a asp-action="Disable2FA" class="btn btn-danger">2FA Devre Dışı Bırak</a>
+}
+else
+{ 
+	<p style="color:red;">2FA Aktif Değil</p>
+	<a asp-action="Enable2FA" class="btn btn-primary">
+		2FA Aktifleştir
+	</a>
+	
+}

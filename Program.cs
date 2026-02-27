@@ -22,12 +22,17 @@ namespace SecureWebAppDemo
 
             builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
             {
-                opt.SignIn.RequireConfirmedEmail = true;
+                opt.SignIn.RequireConfirmedEmail = false;
+                opt.SignIn.RequireConfirmedAccount = false;
+
                 opt.Password.RequiredLength = 8;
                 opt.Password.RequireNonAlphanumeric = true;
 
                 opt.Lockout.MaxFailedAccessAttempts = 5;
                 opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+
+                // 2FA 
+                opt.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
             })
             .AddEntityFrameworkStores<AppDataContext>()
             .AddDefaultTokenProviders();

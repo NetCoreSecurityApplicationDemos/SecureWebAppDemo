@@ -1,0 +1,17 @@
+﻿@model SecureWebAppDemo.Models.LoginModel
+@{
+	ViewData["Title"] = "Two Factor Verification";
+}
+
+<h2>Two Factor Authentication</h2>
+
+<form asp-action="Verify2FA" method="post">
+	<input type="hidden" asp-for="@Model.returnUrl" />
+	 <div>
+		 <label>Enter Verification Code </label>
+		 <input type="text" name="code" required class="form-control" />
+			 
+	 </div>
+	 <button type="submit" class="btn btn-primary mt-2">Giriş</button>
+</form>
+
