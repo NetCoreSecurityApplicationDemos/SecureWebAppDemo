@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using QRCoder;
 using SecureWebAppDemo.Models;
 using SecureWebAppDemo.ViewModel;
 
@@ -136,9 +137,11 @@ namespace SecureWebAppDemo.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            var isValid = await _userManager.VerifyTwoFactorTokenAsync(user,
-                                                                      _userManager.Options.Tokens.AuthenticatorTokenProvider,
-                                                                      code);
+            var isValid = await _userManager.VerifyTwoFactorTokenAsync(
+                user,
+                _userManager.Options.Tokens.AuthenticatorTokenProvider,
+                code.Replace(" ", "").Replace("-", "")
+            );
 
             if (!isValid)
             {
@@ -146,27 +149,33 @@ namespace SecureWebAppDemo.Controllers
                 return View("Enable2FA");
             }
 
-            await _userManager.SetTwoFactorEnabledAsync(user, false);
+            // ✅ 2FA aktif edilir
+            await _userManager.SetTwoFactorEnabledAsync(user, true);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Manage");
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Enable2FA()
         {
-            var userItem = await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
-            await _userManager.ResetAuthenticatorKeyAsync(userItem);
+            var key = await _userManager.GetAuthenticatorKeyAsync(user);
 
-            var key = await _userManager.GetAuthenticatorKeyAsync(userItem);
-            var email = await _userManager.GetEmailAsync(userItem);
+            if (string.IsNullOrEmpty(key))
+            {
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                key = await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+
+            var email = user.Email;
 
             var authenticatorUri = GenerateQrCodeUri(email, key);
 
             ViewBag.SharedKey = key;
             ViewBag.AuthenticatorUri = authenticatorUri;
-
+            ViewBag.QrCodeImage = GenerateQrCodeImage(authenticatorUri);
             return View();
 
         }
@@ -206,7 +215,12 @@ namespace SecureWebAppDemo.Controllers
                 return View(model);
             }
 
-            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model.Code, false, false);
+            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(model
+                                                                                .Code
+                                                                                .Replace(" ", "")
+                                                                                .Replace("-", ""),
+                                                                                model.RememberMe,
+                                                                                rememberClient: true); //remember client cihazı hatırla
 
             if (result.Succeeded)
                 return LocalRedirect(model.ReturnUrl ?? "~/");
@@ -217,9 +231,20 @@ namespace SecureWebAppDemo.Controllers
             ModelState.AddModelError("", "Geçersiz Kod");
             return View(model);
         }
+        
+        
         private string GenerateQrCodeUri(string email, string unformattedKey)
         {
             return $"otpauth://totp/SecureWebAppDemo:{email}?secret={unformattedKey}&issuer=SecureWebAppDemo&digits=6";
+        }
+
+        private string GenerateQrCodeImage(string uri)
+        {
+            using var generator = new QRCodeGenerator();
+            var data = generator.CreateQrCode(uri, QRCodeGenerator.ECCLevel.Q);
+
+            var qrCode = new Base64QRCode(data);
+            return qrCode.GetGraphic(20);
         }
 
 

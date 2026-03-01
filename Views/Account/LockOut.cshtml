@@ -1,0 +1,38 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Hesap Kilitlendi";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body text-center">
+
+                    <h3 class="text-danger mb-3">
+                        Hesabınız Geçici Olarak Kilitlendi
+                    </h3>
+
+                    <p class="mb-4">
+                        Çok fazla hatalı giriş denemesi yaptınız.
+                        Güvenliğiniz için hesabınız geçici olarak kilitlenmiştir.
+                    </p>
+
+                    <p class="text-muted">
+                        Lütfen birkaç dakika sonra tekrar deneyin.
+                    </p>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a asp-controller="Account"
+                               asp-action="Login"
+                               class="btn btn-outline-primary">
+                            Giriş Sayfasına Dön
+                        </a>
+                    </div>
+
+                </div>
+        </div>
+    </div>
+</div>

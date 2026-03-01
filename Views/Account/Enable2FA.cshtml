@@ -1,21 +1,58 @@
-﻿ 
-<h2>2FA Aktifleştir</h2>
-
-<p>Authenticator uygulaması ile QR kodu okutun</p>
-
-<p>Manuel Kod: @ViewBag.SharedKey</p>
-
-<form asp-action="Confirm2FA" method="post">
-	<div>
-		<label>Doğrulama Kodu</label>
-		<input type="text" name="code" />
-	</div>
-	<button type="submit">Onayla</button>
-</form>
-
-@section Scripts{
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-	<script>
-		new QRCode(document.getElementById("qrCode"), "@ViewBag.AuthenticatorUri"); //Server side qr kod üretmek yerine js ile kod üretiyor
-	</script>
+﻿@{
+    ViewData["Title"] = "2FA Aktifleştir";
 }
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h4 class="text-center mb-4">
+                        İki Adımlı Doğrulama (2FA) Kurulumu
+                    </h4>
+
+                    <p>
+                        Authenticator uygulamanızla aşağıdaki QR kodu tarayın.
+                    </p>
+
+                    <div class="text-center mb-4">
+                        @*<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=@ViewBag.AuthenticatorUri"
+                             alt="QR Code" class="img-fluid border p-2" />*@
+                        <img src="data:image/png;base64,@ViewBag.QrCodeImage"
+                             class="img-fluid border p-2" />
+                    </div>
+
+                    <div class="alert alert-secondary text-center">
+                        <strong>Manuel Anahtar:</strong><br />
+                        <span class="fw-bold">@ViewBag.SharedKey</span>
+                    </div>
+
+                    <hr />
+
+                    <form asp-action="Confirm2FA" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">6 Haneli Doğrulama Kodu</label>
+                            <input name="code"
+                                   class="form-control text-center"
+                                   maxlength="6"
+                                   autocomplete="one-time-code"
+                                   required />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">
+                                Doğrula ve Aktifleştir
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

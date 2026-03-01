@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SecureWebAppDemo.Models
 {
+     
     public class AppUser
         : IdentityUser
     {

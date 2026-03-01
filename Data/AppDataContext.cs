@@ -14,5 +14,15 @@ namespace SecureWebAppDemo.Data
         {
               
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<AppUser>(entity =>
+            {
+                entity.ToTable("AppUser");
+            });
+        }
     }
 }
