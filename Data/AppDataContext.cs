@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SecureWebAppDemo.Models;
 
 namespace SecureWebAppDemo.Data
 {
     public class AppDataContext
-        : IdentityDbContext
+        : IdentityDbContext<AppUser>
     {
 
-        public DbSet<AppUser> AppUsers { get; set; }    
+         
         public AppDataContext(DbContextOptions<AppDataContext> options)
             : base(options)
         {
@@ -23,6 +24,12 @@ namespace SecureWebAppDemo.Data
             {
                 entity.ToTable("AppUser");
             });
+            builder.Entity<IdentityRole>().ToTable("Roles");
+            builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
+            builder.Entity<IdentityUserClaim<string>>().ToTable("UserClaims");
+            builder.Entity<IdentityUserLogin<string>>().ToTable("UserLogins");
+            builder.Entity<IdentityRoleClaim<string>>().ToTable("RoleClaims");
+            builder.Entity<IdentityUserToken<string>>().ToTable("UserTokens");
         }
     }
 }
