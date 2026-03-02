@@ -22,7 +22,7 @@ namespace SecureWebAppDemo.Data
 
             builder.Entity<AppUser>(entity =>
             {
-                entity.ToTable("AppUser");
+                entity.ToTable("AppUsers");
             });
             builder.Entity<IdentityRole>().ToTable("Roles");
             builder.Entity<IdentityUserRole<string>>().ToTable("UserRoles");
