@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using QRCoder;
 using SecureWebAppDemo.Models;
 using SecureWebAppDemo.ViewModel;
+using System.Security.Claims;
 
 namespace SecureWebAppDemo.Controllers
 {
@@ -97,23 +98,32 @@ namespace SecureWebAppDemo.Controllers
             var user = new AppUser()
             {
                 Email = model.Email,
-                UserName = model.Email
+                UserName = model.Email,
+                TwoFactorEnabled = true
             };
 
+            //
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded)
-                return RedirectToAction("Login", "Account");
-            else
+            if (!result.Succeeded)
             {
+
                 foreach (var item in result.Errors)
                 {
                     ModelState.AddModelError("", item.Code + " - " + item.Description);
                 }
+
+                return View(model);
             }
 
+            // Kalıcı claim ekleme(DB -->UserClaims tablosuna ekler)
+            await _userManager.AddClaimAsync(user,
+                                             new System.Security.Claims.Claim("Department", "IT"));
 
-            return View(model);
+            await _userManager.AddClaimAsync(user,
+                                             new System.Security.Claims.Claim(ClaimTypes.Role, "Admin"));
+
+            return RedirectToAction("Login", "Account");
         }
 
 
