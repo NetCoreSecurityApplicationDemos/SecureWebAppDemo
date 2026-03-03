@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
@@ -41,7 +42,7 @@ namespace SecureWebAppDemo.Controllers
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
 
-        public async Task<IActionResult> Login(LoginModel loginModel, string? returnUrl = null)
+        public async Task<IActionResult> LoginOld(LoginModel loginModel, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -73,9 +74,87 @@ namespace SecureWebAppDemo.Controllers
 
             ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
             return View(loginModel);
-        } 
+        }
+
+        /// <summary>
+        ///  returnUrl Yetkisiz erişim sonrası geri yönlendirme.. Custom Claim ekleme
+        /// </summary>
+        /// <param name="loginModel"></param>
+        /// <param name="returnUrl"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+
+        public async Task<IActionResult> Login(LoginModel loginModel, string? returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+                return View(loginModel);
+
+            returnUrl ??= Url.Content("~/");
+
+            var user = await _userManager.FindByEmailAsync(loginModel.email);
+            if (user is null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+                return View(loginModel);
+            }
+
+            var passwordResult = await _signInManager.CheckPasswordSignInAsync(user,
+                                                                               loginModel.password,
+                                                                               lockoutOnFailure: true);
+
+            if (passwordResult.IsLockedOut)
+                return View("LockOut");
+
+            if (passwordResult.RequiresTwoFactor)
+                return RedirectToAction("Verify2FA", new { ReturnUrl = returnUrl });
+
+            if (!passwordResult.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+                return View(loginModel);
+            }
+
+            //Custom Claim Ekleme
+
+            var additionalClaims = new List<Claim>()
+            {
+                 new Claim("CustomClaim1","Volkan"),
+                 new Claim("CustomClaim2","Tolkan")
+            };
+
+            /* var authProps = new AuthenticationProperties()
+             {
+                 IsPersistent = true,
+                 ExpiresUtc = DateTime.UtcNow,
+
+             };
+
+             authProps.Parameters.Add("CustomProp", "Samsun55");
 
 
+             await _signInManager.SignInWithClaimsAsync(user,
+                                              authProps,
+                                              additionalClaims);*/
+
+
+            var authProps = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTime.UtcNow.AddMinutes(30)
+            };
+
+            authProps.Items["CustomProp"] = "Samsun55";
+
+            await _signInManager.SignInWithClaimsAsync(
+                user,
+                authProps,
+                additionalClaims);
+
+
+            return LocalRedirect(returnUrl);
+        }
 
         [HttpGet]
         [AllowAnonymous]
