@@ -40,6 +40,8 @@ namespace SecureWebAppDemo
 
             builder.Services.ConfigureApplicationCookie(opt =>
             {
+                opt.Cookie.Name = "VolkiCookie";
+                opt.ExpireTimeSpan = TimeSpan.FromMinutes(2);
                 opt.Cookie.HttpOnly = true;
                 opt.LoginPath = "/Account/Login";
                 opt.AccessDeniedPath = "/Account/AccessDenied";
@@ -47,6 +49,11 @@ namespace SecureWebAppDemo
                 //opt.DataProtectionProvider.CreateProtector
             });
 
+
+            builder.Services.Configure<SecurityStampValidatorOptions>(opt =>
+            {
+                opt.ValidationInterval = TimeSpan.FromMinutes(2);
+            });
 
             
 
